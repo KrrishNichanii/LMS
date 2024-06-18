@@ -1,0 +1,20 @@
+import {Router} from 'express'
+import { allPayments, buySubscription, cancelSubscription, getRazorpayApiKey, verifySubscription } from '../controllers/payment.controller.js';
+import { authorizedRoles, authorizedSubScriber, isLoggedIn } from '../middlewares/auth.middleware.js';
+
+const router =Router() ; 
+
+router.get('/razorpay-key',isLoggedIn,getRazorpayApiKey) ; 
+
+router.post('/subscribe',isLoggedIn , buySubscription) ; 
+
+router.post('/verify',isLoggedIn , verifySubscription) ; 
+
+router.post('/unsubscribe',isLoggedIn ,authorizedSubScriber, cancelSubscription) ;
+
+router.get('/'  ,
+       isLoggedIn,
+       authorizedRoles('ADMIN'),
+       allPayments) ; 
+
+export default router
