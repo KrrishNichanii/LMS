@@ -70,6 +70,10 @@ export const createNewCourse = createAsyncThunk('/course/create',async (data) =>
     }
 })
 
+
+
+
+
 const courseSlice = createSlice({
     name:"courses" , 
     initialState , 

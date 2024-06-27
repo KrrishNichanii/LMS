@@ -58,6 +58,38 @@ export const deleteCourseLecture = createAsyncThunk('/course/lecture/delete',asy
     }
 })
 
+export const deleteCommentFromLecture = createAsyncThunk('/course/commentDelete',async (data) => {
+    const {courseId ,lectureId , commentId} = data ; 
+    console.log(commentId , lectureId , courseId);
+    try {
+         const response = axiosInstance.delete(`courses/comment?courseId=${courseId}&lectureId=${lectureId}&commentId=${commentId}`) ; 
+         toast.promise(response,{
+         loading:'Deleting comment' , 
+         success: 'Comment deleted successfully' , 
+         error: 'Failed to delete comment'
+         })
+       return (await response).data ; 
+    } catch (error) {
+     toast.error(error?.response?.data?.message) ;
+    }
+ })
+
+export const addCommentToLecture = createAsyncThunk('/course/commentAdd',async (data) => {
+    const {courseId ,lectureId , text , user} = data ; 
+    console.log(courseId , lectureId , text , user);
+    try {
+         const response = axiosInstance.post(`courses/comment?courseId=${courseId}&lectureId=${lectureId}`,{text,user}) ; 
+         toast.promise(response,{
+         loading:'Adding comment' , 
+         success: 'Comment added successfully' , 
+         error: 'Failed to add comment'
+         })
+         return (await response).data ; 
+    } catch (error) {
+     toast.error(error?.response?.data?.message) ;
+    }
+})
+
 const lectureSlice = createSlice({
     name: "lecture",
     initialState ,
@@ -65,12 +97,19 @@ const lectureSlice = createSlice({
     extraReducers: (builder) => {
             builder 
                .addCase(getCourseLectures.fulfilled,(state,action) => {
-                //   console.log(action.payload);
+                   //console.log('Lec While getting lectures ',action?.payload);
                   state.lectures = action?.payload?.data ; 
                })
                .addCase(addCourseLecture.fulfilled,(state,action)=> {
                 //console.log(action.payload); 
                 state.lectures = action?.payload?.course?.lectures ; 
+               })
+               .addCase(deleteCommentFromLecture.fulfilled,(state,action) => {
+                //console.log('Lec While deleting comment ',action?.payload);
+                 state.lectures = action?.payload?.data
+               }) 
+               .addCase(addCommentToLecture.fulfilled,(state,action) => {
+                state.lectures = action?.payload?.data ; 
                })
     }
 })

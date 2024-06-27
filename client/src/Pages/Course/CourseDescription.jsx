@@ -19,7 +19,7 @@ function CourseDescription() {
             <img
              src={state?.thumbnail?.secure_url}
              alt = 'thumbnail'
-             className='w-full h-64'
+             className='w-100 h-100'
             />
             <div className="space-y-4">
                 <div className="flex flex-col items-center justify-between text-xl">

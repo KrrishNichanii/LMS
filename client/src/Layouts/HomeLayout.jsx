@@ -13,9 +13,10 @@ function HomeLayout({children}) {
   
   const isLoggedIn = useSelector((state) => state?.auth?.isLoggedIn) ; 
   const role = useSelector((state) => state.auth.role) ; 
+  const data = useSelector((state) => state?.auth?.data) ; 
+  const status = data?.subscription?.status;  
   
-  
-  
+  //console.log(data);
   const changeWidth = () => {
     const drawer = document.getElementsByClassName('drawer') ; 
     drawer[0].style.width = '16%' ;   
@@ -33,7 +34,7 @@ function HomeLayout({children}) {
   
   const handleLogout = async (e) => {
         e.preventDefault()
-        
+        console.log('TT');
         const res = await dispatch(logout()) ; 
         if(res?.payload?.success)
         navigate('/') ; 
@@ -44,7 +45,7 @@ return (
         <div className="drawer absolute left-0 z-50 w-0">
              <input className='drawer-toggle' id='my-drawer' type="checkbox" />
              <div className="drawer-content">
-                <label htmlFor="my-drawer" className='cursor-pointer relative w-full'>
+                <label htmlFor="my-drawer" className='cursor-pointer relative '>
                      <FiMenu  
                      onClick={changeWidth}
                      size={'32px'}
@@ -83,6 +84,23 @@ return (
                         <Link to="/courses" >All Courses</Link>
                     </li>
 
+                    {
+                         role == 'ADMIN' ?
+                         
+                         (<li  className='h-[4rem] text-xl px-2'
+                            onClick={() => navigate('/chat',{state:{...data}})}>
+                                
+                                <Link onClick={() => navigate('/chat',{state:{...data}})}>Chat Support</Link></li>) 
+                            
+                            :
+
+                            status == 'active' && 
+                            
+                            (<li className='h-[4rem] text-xl px-2' 
+                                       onClick={() => navigate('/chat',{state:{...data}})}
+                            ><Link onClick={() => navigate('/chat',{state:{...data}})}>Clear doubts</Link></li>)
+                    }
+
                     <li className='h-[4rem] text-xl px-2'>
                         <Link to="/contact" >Contact Us</Link>
                     </li>
@@ -114,7 +132,7 @@ return (
                                     <Link >Profile</Link>
                                 </button>
 
-                                <button onClick={() => handleLogout} className='btn btn-secondary text-lg py-1 font-semibold text-white rounded-md w-[45%]'>
+                                <button onClick={handleLogout} className='btn btn-secondary text-lg py-1 font-semibold text-white rounded-md w-[45%]'>
                                     <Link >Logout</Link>
                                 </button>
 

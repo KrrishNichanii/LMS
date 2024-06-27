@@ -19,6 +19,11 @@ import CheckoutFailure from './Pages/Payment/CheckoutFailure'
 import DisplayLectures from './Pages/Dashboard/DisplayLectures'
 import AddLecture from './Pages/Dashboard/AddLecture'
 import AdminDashboard from './Pages/Dashboard/AdminDashboard'
+import Chat from './Pages/Chat/Chat'
+import { disableReactDevTools } from '@fvilers/disable-react-devtools'
+
+if(process.env.NODE_ENV === 'production') disableReactDevTools() ;
+
 
 function App() {
 
@@ -48,6 +53,7 @@ function App() {
           <Route path='/checkout/success' element={<CheckoutSuccess/>}/>
           <Route path='/checkout/fail' element={<CheckoutFailure/>}/>
           <Route path='/course/displaylectures' element={<DisplayLectures/>}/>
+          <Route path="/chat" element={<Chat/>}/>
       </Route>
      
       <Route path='*' element={<NotFound/>}/>

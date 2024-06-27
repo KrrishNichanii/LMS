@@ -29,42 +29,101 @@ const getLecturesByCourseId = asyncHandler(async (req,res ) => {
 
 })
 
-const createCourse = asyncHandler(async (req,res,next) => {
-      const {title , description , category , createdBy ,paid} = req.body ; 
+// const createCourse = asyncHandler(async (req,res,next) => {
+//       const {title , description , category , createdBy ,paid} = req.body ; 
 
-      if(!title || !description || !category || !createdBy || !paid){
-        return next(new ApiError(400 , 'All fields are required')) ; 
-      }
+//       if(!title || !description || !category || !createdBy || !paid){
+//         return next(new ApiError(400 , 'All fields are required')) ; 
+//       }
 
-      const course = await Course.create({
-        title , 
-        description , 
-        category , 
-        createdBy ,  
-        paid
-      }) ; 
+//       const course = await Course.create({
+//         title , 
+//         description , 
+//         category , 
+//         createdBy ,  
+//         paid
+//       }) ; 
 
-      if(!course){
-        return next(new ApiError(400 , 'Course could not be created , Please try again')) ;
-      }
+//       if(!course){
+//         return next(new ApiError(400 , 'Course could not be created , Please try again')) ;
+//       }
 
-      if(req.file){
-        try {
-            const result = await uploadOnCloudinary(req.file.path) ; 
+//       if(req.file){
+//         try {
+//             const result = await uploadOnCloudinary(req.file.path) ; 
           
-            if(result) {
-                course.thumbnail.public_id = result.public_id ;
-                course.thumbnail.secure_url = result.secure_url ; 
-            }
-        } catch (error) {
-            return next(new ApiError(400 , 'Error processing thumbnail')) ; 
-        }
+//             if(result) {
+//                 course.thumbnail.public_id = result.public_id ;
+//                 course.thumbnail.secure_url = result.secure_url ; 
+//             }
+//         } catch (error) {
+//             await Course.findByIdAndDelete(course._id) ; 
+//             return next(new ApiError(400 , 'Error processing thumbnail')) ; 
+//         }
+//       }
+
+//       await course.save() ; 
+
+//       res.status(200).json(new ApiResponse(200 , course , 'Course created successfully')) ; 
+// }) ; 
+
+ const createCourse = asyncHandler(async (req, res, next) => {
+  const { title, description, category, createdBy ,paid } = req.body;
+
+  if (!title || !description || !category || !createdBy || !paid) {
+    return next(new ApiError(400,'All fields are required'));
+  }
+
+  const course = await Course.create({
+    title,
+    description,
+    category,
+    createdBy,
+    paid,
+  });
+
+  if (!course) {
+    return next(
+      new ApiError(400,'Course could not be created, please try again')
+    );
+  }
+
+  // Run only if user sends a file
+  if (req.file) {
+    try {
+      const result = await cloudinary.v2.uploader.upload(req.file.path, {
+      });
+
+      // If success
+      if (result) {
+        // Set the public_id and secure_url in array
+        course.thumbnail.public_id = result.public_id;
+        course.thumbnail.secure_url = result.secure_url;
       }
 
-      await course.save() ; 
+      // After successful upload remove the file from local storage
+      fs.rm(`public/temp/${req.file.filename}`);
+    } catch (error) {
+      console.log('Err ',error.message);
+      await Course.findByIdAndDelete(course._id) ; 
+      for (const file of await fs.readdir('public/temp/')) {
+        await fs.unlink(path.join('public/temp/', file));
+      }
 
-      res.status(200).json(new ApiResponse(200 , course , 'Course created successfully')) ; 
-}) ; 
+      // Send the error message
+      return next(
+        new ApiError(
+          400 , 
+          JSON.stringify(error) || 'File not uploaded, please try again',``
+        )
+      );
+    }
+  }
+
+  await course.save();
+
+  res.status(200).json(new ApiResponse(200 , course , 'Course created successfully')) ; 
+});
 
 const updateCourse = asyncHandler(async (req,res,next) => {
      try {
@@ -100,12 +159,13 @@ const removeCourse = asyncHandler(async (req,res,next) => {
    res.status(200).json(new ApiResponse(200 , course , 'Course deleted successfully')) ; 
 }) ; 
 
+
  const addLectureToCourseById = asyncHandler(async (req, res, next) => {
-  const { title, description } = req.body;
+  const { title, description  } = req.body;
   const { id } = req.params;
   console.log('Entering ');
   let lectureData = {};
-
+  lectureData.comments= []
   if (!title || !description) {
     return next(new ApiError(400 , 'Title and Description are required'));
   }
@@ -228,7 +288,68 @@ const removeLectureById = asyncHandler(async (req, res, next) => {
     });
   });
 
+  const addComment = asyncHandler(async (req, res, next) => {
+    const { courseId, lectureId } = req.query;
+    const { user, text, date } = req.body;
+    if (!courseId || !lectureId) {
+      return next(new ApiError(400, "Course ID and Lecture ID are required"));
+    }
+    
+    try {
+      const course = await Course.findById(courseId);
+      if (!course) {
+        return next(new ApiError(404, "Course not found"));
+      }
+      
+      let lectureFound = false;
+      course.lectures = course.lectures.map((lecture) => {
+        if (lecture._id.toString() === lectureId) {
+          lectureFound = true;
+          console.log('Found lecture ',lecture);
+          if (!lecture.lecture.comments) lecture.lecture.comments = [];
+          lecture.lecture.comments.push({ user, text, date });
+        }
+        return lecture;
+      });
+      
+      if (!lectureFound) {
+        return next(new ApiError(404, "Lecture not found"));
+      }
+      console.log('CLec',course.lectures);
+      // return res.json("test") ; 
+      await course.save();
+  
+      return res.status(200).json(new ApiResponse(200, course.lectures, 'Comment added'));
+    } catch (error) {
+      console.log(error);
+      return next(new ApiError(500, "Failed to add comment"));
+    }
+  });
 
+  const deleteComment = asyncHandler(async (req,res,next) => {
+    const { courseId, lectureId ,commentId } = req.query;
+
+     const course = await Course.findById(courseId) ; 
+     
+     if(!course) return  next(new ApiError(400,'Course not found'))
+     try {
+      course.lectures.map(lecture => {
+         
+       if(lecture._id.toString() == lectureId){
+          lecture.lecture.comments  = lecture.lecture.comments.filter(comment => comment._id.toString() != commentId) ; 
+        console.log(lecture.lecture.comments)
+       }
+       
+       return lecture ; 
+      })
+      await course.save() ; 
+      return res.status(200).json(new ApiResponse(200,course.lectures,'Comment Deleted')) ; 
+     } catch (error) {
+       return next(new ApiError(400,error?.message)) ; 
+     }
+
+  })
+  
 
 export {
     getAllCourses , 
@@ -238,4 +359,6 @@ export {
     removeCourse , 
     addLectureToCourseById,
     removeLectureById , 
+    addComment , 
+    deleteComment
 }

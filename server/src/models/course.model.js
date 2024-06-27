@@ -31,19 +31,28 @@ const courseSchema = new Schema({
                 secure_url: {
                     type: String , 
                     required: true , 
-                }
+                },
+                comments: [
+                    {
+                      text: String,
+                      user: String,
+                      date: {
+                        type: Date,
+                        default: Date.now,
+                      },
+                    },
+                  ],
             } , 
-
         }
     ] , 
     thumbnail: {
         public_id: {
-            type:String
-        } , 
+          type: String,
+        },
         secure_url: {
-            type: String , 
-        }
-    } ,
+          type: String,
+        },
+      },
     paid: {
          type: String , 
          required:[true, 'Paid field is required'] , 

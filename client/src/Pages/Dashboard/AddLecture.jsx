@@ -72,7 +72,7 @@ function AddLecture() {
   return (
     <HomeLayout>
          <div className="min-h-[90vh] text-white flex flex-col items-center justify-center gap-10 mx-16">
-            <div className="flex flex-col gap-5 p-4 shadow-[0_0_10px_black] w-[32rem] rounded-lg h-[38rem]">
+            <div className="flex flex-col justify-between p-4 shadow-[0_0_10px_black] w-[35rem] rounded-lg h-[43rem]">
                 <header className='flex items-center justify-center relative'>
                     <button onClick={() => navigate(-1)} className='absolute left-2 text-xl text-green-500'>
                         <AiOutlineArrowLeft className='border border-transparent hover:border-green-500 transition-all ease-in-out duration-500 p-2 hover: rounded-full w-[2.5rem] h-[2.5rem]'/>
@@ -107,7 +107,7 @@ function AddLecture() {
                             controls
                             controlsList='nodownload nofullscreen'
                             disablePictureInPicture
-                            className='object-fill rounded-md w-full'
+                            className='w-full max-h-64 object-contain rounded-md'
                             >
 
                             </video>

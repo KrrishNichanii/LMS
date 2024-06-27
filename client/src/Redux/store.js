@@ -13,7 +13,7 @@ const store = configureStore({
         lecture: LectureSliceReducer ,
         stat: StatSliceReducer
     },
-    devTools: true
+    devTools: false
 })  ;
 
 export default store ; 

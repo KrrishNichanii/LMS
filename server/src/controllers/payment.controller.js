@@ -98,11 +98,50 @@ const cancelSubscription = asyncHandler(async (req,res,next) => {
         }
     
         const subscriptionId = user.subscription.id ; 
+        console.log('S ID ',user.subscription.id);
         const subscription = await razorpay.subscriptions.cancel(subscriptionId) ; 
         user.subscription.status = subscription.status ;  
     
         await user.save() ;
+          // Finding the payment using the subscription ID
+      const payment = await Payment.findOne({
+        razorpay_subscription_id: subscriptionId,
+      });
+
+      // Getting the time from the date of successful payment (in milliseconds)
+      const timeSinceSubscribed = Date.now() - payment.createdAt;
+
+      // refund period which in our case is 14 days
+      const refundPeriod = 14 * 24 * 60 * 60 * 1000;
+
+      // Check if refund period has expired or not
+      if (refundPeriod <= timeSinceSubscribed) {
+        return next(
+          new ApiError(
+            400 , 
+            'Refund period is over, so there will not be any refunds provided.',
+          )
+        );
+      }
+
+      // If refund period is valid then refund the full amount that the user has paid
+      await razorpay.payments.refund(payment.razorpay_payment_id, {
+        speed: 'optimum', // This is required
+      });
+
+      user.subscription.id = undefined; // Remove the subscription ID from user DB
+      user.subscription.status = undefined; // Change the subscription Status in user DB
+
+      await user.save();
+      await payment.remove();
+
+      // Send the response
+      res.status(200).json({
+        success: true,
+        message: 'Subscription canceled successfully',
+      });
     } catch (error) {
+         console.log(error);
          return next(new ApiError(500 ,error.message)) ;
     }
 })
