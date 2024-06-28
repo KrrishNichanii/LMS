@@ -6,13 +6,16 @@ import { deleteFromCloudinary, uploadOnCloudinary } from "../utils/cloudinary.js
 import sendEmail from "../utils/sendEmail.js";
 import crypto from 'crypto'
 
+const domain = process.env.FRONTEND_URL || 'https://lms-frontend-7kkl68otv-krrish-nichaniis-projects.vercel.app';
 
 
 const cookieOptions = {
-    maxAge: 7 * 24 * 60 * 60 * 1000 ,  //7d
-    httpOnly: true , 
-    secure: true
-}
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production', // Set to true in production
+    sameSite: 'None', // Necessary for cross-site cookies
+    domain: domain.startsWith('http://') ? domain.substring(7) : domain.startsWith('https://') ? domain.substring(8) : domain, // strip protocol
+  };
 
 const register = asyncHandler(async (req,res,next) => {
     const {fullName , email , password} = req.body ; 
