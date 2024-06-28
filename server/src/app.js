@@ -27,10 +27,10 @@ app.use('/ping',(req,res) => {
 
 
 //routes
-app.use('/api/v1/user',userRouter)
-app.use('/api/v1/courses',courseRouter)
-app.use('/api/v1/payments',paymentRouter)
-app.use('/api/v1', miscRouter);
+app.use('/user',userRouter)
+app.use('/courses',courseRouter)
+app.use('/payments',paymentRouter)
+app.use('/', miscRouter);
 app.use(errorMiddleware) ; 
 
 app.all('*', (req,res) => {
