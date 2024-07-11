@@ -12,9 +12,7 @@ const domain = process.env.FRONTEND_URL || 'https://lms-frontend-7kkl68otv-krris
 const cookieOptions = {
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production', // Set to true in production
-    sameSite: 'None', // Necessary for cross-site cookies
-    domain: domain.startsWith('http://') ? domain.substring(7) : domain.startsWith('https://') ? domain.substring(8) : domain, // strip protocol
+    origin:process.env.FRONTEND_URL
   };
 
 const register = asyncHandler(async (req,res,next) => {
@@ -97,6 +95,7 @@ const login = asyncHandler(async (req,res) => {
     user.password = undefined ; 
 
     res.cookie('token' , token , cookieOptions) ; 
+    console.log('Sending token ',token);
     return res.status(201).json(new ApiResponse(200 ,user , 'User logged in successfully'))
 })
 

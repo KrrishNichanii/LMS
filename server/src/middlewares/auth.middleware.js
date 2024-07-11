@@ -5,6 +5,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 
 const isLoggedIn = async (req,res,next) => {
     const {token} = req.cookies ; 
+    console.log('This is token ',token);
     if(!token){
         return next(new ApiError(400 , 'Unauthenticated ,please login to continue'))
     }
