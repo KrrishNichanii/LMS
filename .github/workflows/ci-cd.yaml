@@ -1,25 +1,26 @@
-name: CI/CD Pipeline
+name: Frontend (client) and Backend (server) CI/CD Pipeline
 
 on:
   push:
     branches:
-      - main  # Trigger on push to main
+      - main  # Trigger the pipeline on pushes to the main branch
   pull_request:
     branches:
-      - main  # Trigger on pull requests to main
+      - main  # Trigger the pipeline on pull requests to the main branch
 
 jobs:
-  # Frontend Build and Test
+  # Frontend (Client) Build and Test
   frontend:
+    name: Client (Frontend)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Node.js
+      - name: Set up Node.js for Frontend
         uses: actions/setup-node@v3
         with:
-          node-version: '16'
+          node-version: '20'  # Use Node.js 20 for the frontend
 
       - name: Install frontend dependencies
         run: |
@@ -36,17 +37,18 @@ jobs:
           cd client
           npm test
 
-  # Backend Build and Test
+  # Backend (Server) Build and Test
   backend:
+    name: Server (Backend)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Node.js
+      - name: Set up Node.js for Backend
         uses: actions/setup-node@v3
         with:
-          node-version: '16'
+          node-version: '20'  # Use Node.js 20 for the backend
 
       - name: Install backend dependencies
         run: |
@@ -57,3 +59,4 @@ jobs:
         run: |
           cd server
           npm test
+
