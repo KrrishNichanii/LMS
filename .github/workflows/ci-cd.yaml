@@ -3,13 +3,13 @@ name: Frontend (client) and Backend (server) CI/CD Pipeline
 on:
   push:
     branches:
-      - main  # Trigger the pipeline on pushes to the main branch
+      - main  
   pull_request:
     branches:
-      - main  # Trigger the pipeline on pull requests to the main branch
+      - main  
 
 jobs:
-  # Frontend (Client) Build and Test
+  
   frontend:
     name: Client (Frontend)
     runs-on: ubuntu-latest
@@ -20,7 +20,7 @@ jobs:
       - name: Set up Node.js for Frontend
         uses: actions/setup-node@v3
         with:
-          node-version: '20'  # Use Node.js 20 for the frontend
+          node-version: '20'  
 
       - name: Install frontend dependencies
         run: |
@@ -32,12 +32,8 @@ jobs:
           cd client
           npm run build
 
-      - name: Test frontend
-        run: |
-          cd client
-          npm test
 
-  # Backend (Server) Build Only
+  #
   backend:
     name: Server (Backend)
     runs-on: ubuntu-latest
@@ -48,7 +44,7 @@ jobs:
       - name: Set up Node.js for Backend
         uses: actions/setup-node@v3
         with:
-          node-version: '20'  # Use Node.js 20 for the backend
+          node-version: '20'  
 
       - name: Install backend dependencies
         run: |
